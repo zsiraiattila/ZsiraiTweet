@@ -22,7 +22,6 @@ import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.services.StatusesService;
 import com.twitter.sdk.android.tweetui.CompactTweetView;
-import com.twitter.sdk.android.tweetui.TweetUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

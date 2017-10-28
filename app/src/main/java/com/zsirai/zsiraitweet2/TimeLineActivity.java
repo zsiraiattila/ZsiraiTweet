@@ -4,11 +4,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mopub.volley.Response;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
@@ -16,23 +17,11 @@ import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.models.Tweet;
-import com.twitter.sdk.android.core.models.TwitterCollection;
 import com.twitter.sdk.android.core.services.StatusesService;
-import com.twitter.sdk.android.tweetui.CollectionTimeline;
-import com.twitter.sdk.android.tweetui.CompactTweetView;
 import com.twitter.sdk.android.tweetui.FixedTweetTimeline;
 import com.twitter.sdk.android.tweetui.SearchTimeline;
-import com.twitter.sdk.android.tweetui.Timeline;
-import com.twitter.sdk.android.tweetui.TimelineCursor;
-import com.twitter.sdk.android.tweetui.TimelineFilter;
-import com.twitter.sdk.android.tweetui.TimelineResult;
-import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
 import com.twitter.sdk.android.tweetui.TweetTimelineRecyclerViewAdapter;
-import com.twitter.sdk.android.tweetui.TweetUtils;
-import com.twitter.sdk.android.tweetui.TwitterListTimeline;
-import com.twitter.sdk.android.tweetui.UserTimeline;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +47,20 @@ public class TimeLineActivity extends AppCompatActivity {
         titleTimeLineTV = (TextView) findViewById(R.id.titleTimeLineTV);
         titleTimeLineTV.setText(twitterSession.getUserName() + " 's " + titleTimeLineTV.getText());
         getandloadTweets(twitterSession);
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.timeline_menu,menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_referesh) {
+            getandloadTweets(twitterSession);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void getandloadTweets(TwitterSession session) {

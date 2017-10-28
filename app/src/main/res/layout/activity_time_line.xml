@@ -19,7 +19,11 @@
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/myRecyclerView">
+        android:id="@+id/myRecyclerView"
+        android:layout_below="@+id/titleTimeLineTV"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="19dp">
 
     </android.support.v7.widget.RecyclerView>
 
