@@ -45,7 +45,7 @@ public class HomePage extends AppCompatActivity {
         tweetTimeLineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent timeLineIntent = new Intent(HomePage.this,TimeLine.class);
+                Intent timeLineIntent = new Intent(HomePage.this,TimeLineActivity.class);
                 startActivity(timeLineIntent);
 
             }
