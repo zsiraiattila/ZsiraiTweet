@@ -24,5 +24,17 @@
         android:layout_alignRight="@+id/tweetUpdateButton"
         android:layout_alignEnd="@+id/tweetUpdateButton" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/getTCSVButton"
+        android:text="getTweets"
+        android:layout_marginTop="19dp"
+        android:layout_below="@+id/tweetTimeLineButton"
+        android:layout_alignRight="@+id/tweetTimeLineButton"
+        android:layout_alignEnd="@+id/tweetTimeLineButton"
+        android:layout_alignLeft="@+id/tweetTimeLineButton"
+        android:layout_alignStart="@+id/tweetTimeLineButton" />
+
 
 </RelativeLayout>
