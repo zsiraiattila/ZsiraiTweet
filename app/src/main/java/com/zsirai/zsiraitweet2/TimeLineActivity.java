@@ -113,7 +113,7 @@ public class TimeLineActivity extends AppCompatActivity {
 
                 num = writeTweetsToCSV(tweets);
                 Toast.makeText(getApplicationContext(), "Tweets number is " + result.data.size(), Toast.LENGTH_LONG).show();
-                Toast.makeText(getApplicationContext(), "Writted out tweet num to csv is " + num, Toast.LENGTH_LONG).show();
+           //     Toast.makeText(getApplicationContext(), "Writted out tweet num to csv is " + num, Toast.LENGTH_LONG).show();
             }
 
             @Override
