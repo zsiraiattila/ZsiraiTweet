@@ -34,4 +34,5 @@ dependencies {
     compile 'com.android.support:design:26.+'
     compile 'junit:junit:4.12'
     compile 'com.monkeylearn:monkeylearn-java:0.1.4'
+    compile 'org.tensorflow:tensorflow-android:1.2.0-rc0'
 }

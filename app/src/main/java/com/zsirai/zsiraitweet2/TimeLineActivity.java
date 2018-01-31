@@ -1,5 +1,6 @@
 package com.zsirai.zsiraitweet2;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,7 +30,14 @@ import com.twitter.sdk.android.tweetui.TimelineFilter;
 import com.twitter.sdk.android.tweetui.TweetTimelineRecyclerViewAdapter;
 import com.monkeylearn.MonkeyLearn;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -43,19 +51,27 @@ public class TimeLineActivity extends AppCompatActivity {
     FrameLayout myFrameLayout;
     RecyclerView myRecyclerView;
     List<Tweet> tweets;
+    HomePage homePage;
+    Long sinceId;
+    int numTweets;
+    String baseDir;
+    String fileName;
+    String filePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_time_line);
+        numTweets = 20;
 
+        homePage = new HomePage();
         tweets = new ArrayList<Tweet>();
         myFrameLayout = (FrameLayout) findViewById(R.id.myFrameLayout);
         myRecyclerView = (RecyclerView) findViewById(R.id.myRecyclerView);
         twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
         titleTimeLineTV = (TextView) findViewById(R.id.titleTimeLineTV);
         titleTimeLineTV.setText(twitterSession.getUserName() + " 's " + titleTimeLineTV.getText());
-        getandloadTweets(twitterSession);
+        getandloadTweets(twitterSession,numTweets);
     }
 
     @Override
@@ -67,55 +83,37 @@ public class TimeLineActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_referesh) {
-            getandloadTweets(twitterSession);
+            getandloadTweets(twitterSession,numTweets);
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void getandloadTweets(TwitterSession session) {
+    private void getandloadTweets(TwitterSession session,int numTweets) {
         TwitterApiClient twitterApiClient = TwitterCore.getInstance().getApiClient();
         StatusesService statusesService = twitterApiClient.getStatusesService();
 
         myRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         statusesService.userTimeline(null, null, null, null, null, null, null, null, null);
-        Call<List<Tweet>> call = statusesService.homeTimeline(50, null, null, null, null, null, null);
+        Call<List<Tweet>> call = statusesService.homeTimeline(numTweets, null, null, null, null, null, null);
 
         call.enqueue(new Callback<List<Tweet>>() {
 
             @Override
             public void success(Result<List<Tweet>> result) {
-                addTweetsToRecycleView(result.data);
-                StringBuilder sBuilder = new StringBuilder();
-                StringBuilder tsBuilder = new StringBuilder();
-
+                ArrayList<Tweet> tweets = new ArrayList<Tweet>();
+                for (int i = 0; i < result.data.size(); i++) {
+                    if (result.data.get(i).lang.compareTo("en") == 0) {
+                        tweets.add(result.data.get(i));
+                    }
+                }
+                sinceId = tweets.get(tweets.size() - 1).getId();
+                addTweetsToRecycleView(tweets);
                 int num = 0;
 
-                try {
-                    for (int i = 0; i < result.data.size(); i++) {
-                        Tweet act = result.data.get(i);
-                        sBuilder = new StringBuilder();
-                        tsBuilder = new StringBuilder();
-                        String[] text = act.text.split("https");
-                        if (text.length > 1) {
-                            tsBuilder = new StringBuilder(text[0] + ", https" + text[1]);
-                        } else {
-                            tsBuilder = new StringBuilder(text[0]);
-                        }
-
-                        sBuilder.append(act.user.name + " , " + act.user.followersCount + " , "
-                                + tsBuilder.toString() + act.idStr + " , " + act.favoriteCount
-                                + " , " + act.createdAt + "\n");
-                        System.out.println(sBuilder.toString());
-                        num++;
-                    }
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println(e.getMessage());
-                }
+                num = writeTweetsToCSV(tweets);
                 Toast.makeText(getApplicationContext(), "Tweets number is " + result.data.size(), Toast.LENGTH_LONG).show();
-                Toast.makeText(getApplicationContext(), "Writted out tweet num is " + num, Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Writted out tweet num to csv is " + num, Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -128,17 +126,43 @@ public class TimeLineActivity extends AppCompatActivity {
         //      final SearchTimeline searchTimeline = new SearchTimeline.Builder().query("").maxItemsPerRequest(20).build();
     }
 
+    public int writeTweetsToCSV(List<Tweet> list) {
+        baseDir = android.os.Environment.getExternalStorageDirectory().getPath();
+        fileName = "tweets25.csv";
+        filePath = baseDir + File.separator + fileName;
+        File f = new File(filePath);
+        int num = 0;
+
+        try {
+            FileOutputStream outputStream = new FileOutputStream(f, true);
+            OutputStreamWriter osw = new OutputStreamWriter(outputStream);
+            System.out.println("============ Tweets Start ================");
+
+            for (int i = 0; i < list.size(); i++) {
+                if (tweetIsOK(list.get(i)) == true) {
+                    if (isInCSV(list.get(i), f) == false) {
+                        writeTweetOut(list.get(i), osw);
+                        num++;
+                    }
+                    writeTweetOut(list.get(i));
+                }
+            }
+            System.out.println("Writed " + num + " tweet to csv!");
+            osw.flush();
+            osw.close();
+            outputStream.flush();
+            outputStream.close();
+            System.out.println("============ Tweets End ================");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return num;
+    }
+
     private void addTweetsToRecycleView(List<Tweet> tweets) {
 
-            /*
-            sBuilder.append(act.user.name + "\t" + act.user.followersCount + "\t" + act.idStr + "\t" + act.source.toString() + "\t" + text[0] + "\t" + text[1] + "\t"
-                    + act.favorited + "\t" + act.favoriteCount + "\t" + displayUrls(act.entities.urls)
-                    + "\t" + displayHashTags(act.entities.hashtags) + "\t" + displaySimbols(act.entities.symbols)+"\n");
-            System.out.println(sBuilder.toString());
-            sBuilder = new StringBuilder("");
-        } */
-        System.out.println("Connect the recyclerview to the tweet list!");
 
+        System.out.println("Connect the recyclerview to the tweet list!");
         FixedTweetTimeline fixedTimeLine = new FixedTweetTimeline.Builder().setTweets(tweets).build();
         final TweetTimelineRecyclerViewAdapter adapter = new TweetTimelineRecyclerViewAdapter.Builder(this)
                 .setTimeline(fixedTimeLine)
@@ -146,19 +170,6 @@ public class TimeLineActivity extends AppCompatActivity {
                 .build();
 
         myRecyclerView.setAdapter(adapter);
-    }
-
-    public void writeTweetOut(Tweet act) {
-        StringBuilder sBuilder = new StringBuilder();
-        String[] text = act.text.split("https");
-        text[1] = "https" + text[1];
-        sBuilder.append(act.user.name + " , " + act.user.followersCount + " , "
-                + text[0] + " , " + text[1] + " , " + act.idStr + " , " + act.favoriteCount
-                + " , " + act.createdAt + "\n");
-//        sBuilder.append(act.user.name + " , " + act.user.followersCount + " , " + act.idStr + " , " + act.source.toString() + " , " + text[0] + " , " + text[1] + " , "
-//                + act.favorited).append(" , " + act.favoriteCount + " , " + displayUrls(act.entities.urls)
-//                + " , " + displayHashTags(act.entities.hashtags) + " , " + displaySimbols(act.entities.symbols) + "\n");
-        System.out.println(sBuilder.toString());
     }
 
     private String displaySimbols(List<SymbolEntity> symbols) {
@@ -188,17 +199,134 @@ public class TimeLineActivity extends AppCompatActivity {
         return result.toString();
     }
 
-    public Tweet copyTweet(Tweet act) {
-        return new Tweet(act.coordinates, act.createdAt, act.currentUserRetweet, act.entities,
-                act.extendedEntities, act.favoriteCount, act.favorited,
-                act.filterLevel, act.id, act.idStr, act.inReplyToScreenName,
-                act.inReplyToStatusId, act.inReplyToStatusIdStr, act.inReplyToUserId,
-                act.inReplyToUserIdStr, act.lang, act.place, act.possiblySensitive,
-                act.scopes, act.quotedStatusId, act.quotedStatusIdStr, act.quotedStatus,
-                act.retweetCount, act.retweeted, act.retweetedStatus, act.source,
-                act.text, act.displayTextRange, act.truncated, act.user,
-                act.withheldCopyright, act.withheldInCountries,
-                act.withheldScope, act.card);
+
+    public int writeTweetsOut(List<Tweet> list ) {
+        int num = 0;
+        for(int i=0;i<list.size();i++) {
+            Tweet actTweet = list.get(i);
+            if (tweetIsOK(actTweet)) {
+                writeTweetOut(actTweet);
+                num++;
+            }
+        }
+        return num;
     }
 
+    public void writeTweetOut(Tweet act) {
+        StringBuilder sBuilder = new StringBuilder();
+        StringBuilder tsBuilder = new StringBuilder();
+        String[] text = act.text.split("http");
+        tsBuilder.append(text[0].replaceAll("\\r|\\n", " "));
+        if (text.length > 1) {
+            text[1] = " , http" + text[1].replaceAll("\\r|\\n", " ");
+            tsBuilder.append(text[1]);
+        }
+
+        sBuilder.append(act.user.name.trim() + " , " + act.user.followersCount + " , " + act.idStr.trim() + " , " + tsBuilder.toString() + " , " + act.favoriteCount + " , "
+                + act.retweetCount + " , " + act.createdAt.trim() + "\n");
+        System.out.println(sBuilder.toString());
+
+    }
+
+    public void writeTweetOut(Tweet act, OutputStreamWriter osw) {
+        StringBuilder sBuilder = new StringBuilder();
+        StringBuilder tsBuilder = new StringBuilder();
+        String[] text = act.text.split("http");
+        tsBuilder.append(text[0].replaceAll("\\r|\\n", " "));
+        if (text.length > 1) {
+            text[1] = " , http" + text[1].replaceAll("\\r|\\n", " ");
+            tsBuilder.append(text[1]);
+        }
+
+        sBuilder.append(act.user.name.trim() + " , " + act.user.followersCount + " , " + act.idStr.trim() + " , " + tsBuilder.toString() + " , " + act.favoriteCount + " , "
+                + act.retweetCount + " , " + act.createdAt.trim() + "\n");
+        System.out.println(sBuilder.toString());
+        try {
+            osw.append(sBuilder.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean tweetIsOK(Tweet tweet) {
+
+        if (tweet.user.name != null && tweet.text != null &&
+                tweet.idStr != null && tweet.createdAt != null) {
+            String idStr = tweet.idStr.toString().trim();
+            String name = tweet.user.name.toString().trim();
+            String text = tweet.text.toString().trim();
+            String createdAt = tweet.createdAt.toString().trim();
+            if (name.length() > 2 && text.length() > 25
+                    && idStr.length() >= 18 && createdAt.length() > 10) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isInCSV(Tweet tweet, File f) {
+
+        if (f.exists()) {
+            try {
+                FileReader fr = new FileReader(f);
+                BufferedReader br = new BufferedReader(fr);
+                String actLine = new String("");
+                String actId = new String("");
+                actLine = br.readLine();
+                while (actLine != null) {
+                    String[] sa = actLine.split(" , ");
+                    if (sa.length >= 7) {
+                        actId = actLine.split(" , ")[2];
+                        actId = actId.trim();
+                        if (actId.equals(tweet.idStr) == true) {
+                            return true;
+                        }
+                    }
+                    actLine = br.readLine();
+                }
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public class TweetGetTaskClass extends AsyncTask<Integer, Void, String> {
+
+        @Override
+        protected String doInBackground(Integer... params) {
+
+
+            final String[] returnString = {new String("default message")};
+            TwitterApiClient client = TwitterCore.getInstance().getApiClient();
+            StatusesService statusesService = client.getStatusesService();
+            if (params[0] > 200) {
+                params[0] = 200;
+            }
+            Call<List<Tweet>> call = statusesService.homeTimeline(params[0], null, null, null, null, null, null);
+            call.enqueue(new Callback<List<Tweet>>() {
+
+                @Override
+                public void success(Result<List<Tweet>> result) {
+                    writeTweetsToCSV(result.data);
+                }
+
+                @Override
+                public void failure(TwitterException exception) {
+                    Toast.makeText(getApplicationContext(), "An error occured when tried to get tweets.", Toast.LENGTH_LONG).show();
+                }
+            });
+
+            return returnString[0];
+        }
+
+        @Override
+        protected void onPostExecute(String returnString) {
+            super.onPostExecute(returnString);
+            Toast.makeText(getApplicationContext(), returnString, Toast.LENGTH_LONG).show();
+        }
+    }
 }
