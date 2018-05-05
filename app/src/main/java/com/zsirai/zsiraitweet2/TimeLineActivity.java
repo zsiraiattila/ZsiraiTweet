@@ -238,6 +238,7 @@ public class TimeLineActivity extends AppCompatActivity {
             tsBuilder.append(text[1]);
         }
 
+
         sBuilder.append(act.user.name.trim() + " , " + act.user.followersCount + " , " + act.idStr.trim() + " , " + tsBuilder.toString() + " , " + act.favoriteCount + " , "
                 + act.retweetCount + " , " + act.createdAt.trim() + "\n");
         System.out.println(sBuilder.toString());
