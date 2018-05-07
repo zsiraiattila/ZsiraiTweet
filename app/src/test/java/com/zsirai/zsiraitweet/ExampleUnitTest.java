@@ -1,4 +1,4 @@
-package com.zsirai.zsiraitweet2;
+package com.zsirai.zsiraitweet;
 
 import org.junit.Test;
 

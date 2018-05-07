@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.zsirai.zsiraitweet2">
+    package="com.zsirai.zsiraitweet">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -12,16 +12,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LoginActivity">
+        <activity android:name="com.zsirai.zsiraitweet.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HomePage" />
-        <activity android:name=".AddTweet" />
-        <activity android:name=".TimeLineActivity"></activity>
+        <activity android:name="com.zsirai.zsiraitweet.HomeActivity" />
+        <activity android:name="com.zsirai.zsiraitweet.AddTweet" />
+        <activity android:name="com.zsirai.zsiraitweet.TimelineActivity"></activity>
     </application>
 
 </manifest>

@@ -1,4 +1,4 @@
-package com.zsirai.zsiraitweet2;
+package com.zsirai.zsiraitweet;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.zsirai.zsiraitweet2", appContext.getPackageName());
+        assertEquals("com.zsirai.zsiraitweet", appContext.getPackageName());
     }
 }

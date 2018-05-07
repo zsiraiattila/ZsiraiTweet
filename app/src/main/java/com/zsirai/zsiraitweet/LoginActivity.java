@@ -1,4 +1,4 @@
-package com.zsirai.zsiraitweet2;
+package com.zsirai.zsiraitweet;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,14 +29,14 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Twitter.initialize(this);
-        setContentView(R.layout.activity_login);
+        setContentView(com.zsirai.zsiraitweet.R.layout.activity_login);
 
-        twitterLoginButton = (TwitterLoginButton) findViewById(R.id.login_button);
+        twitterLoginButton = (TwitterLoginButton) findViewById(com.zsirai.zsiraitweet.R.id.login_button);
         twitterLoginButton.setCallback(new Callback<TwitterSession>() {
             @Override
             public void success(Result<TwitterSession> result) {
                 Toast.makeText(getApplicationContext(), "Successfully LogIn", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(LoginActivity.this, HomePage.class);
+                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                 startActivity(intent);
 
             }

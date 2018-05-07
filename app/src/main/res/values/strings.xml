@@ -1,7 +1,6 @@
 <resources>
-    <string name="app_name">ZsiraiTweet2</string>
+    <string name="app_name">ZsiraiTweet</string>
     <string name="com.twitter.sdk.android.CONSUMER_KEY">PyKp430CaOjaLIHQ3JI0uMGV5</string>
-    <string name="com.twitter.sdk.android.CONSUMER_SECRET">	N9xmQOIs0bfnvuQq75PNYhJTka2DA8oAufbePO0D0O5m3UvTo1
-</string>
-    <string name="title_activity_home_page">HomePage</string>
+    <string name="com.twitter.sdk.android.CONSUMER_SECRET">	N9xmQOIs0bfnvuQq75PNYhJTka2DA8oAufbePO0D0O5m3UvTo1</string>
+    <string name="title_activity_home_page">Homepage</string>
 </resources>

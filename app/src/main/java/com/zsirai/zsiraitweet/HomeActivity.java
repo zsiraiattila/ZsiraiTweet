@@ -1,4 +1,4 @@
-package com.zsirai.zsiraitweet2;
+package com.zsirai.zsiraitweet;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -36,7 +36,7 @@ import java.util.List;
 
 import retrofit2.Call;
 
-public class HomePage extends AppCompatActivity {
+public class HomeActivity extends AppCompatActivity {
 
     TextView titleTV;
     TwitterSession session;
@@ -44,7 +44,7 @@ public class HomePage extends AppCompatActivity {
     Button tweetPostButton;
     Button tweetTimeLineButton;
     Button getTweetsToCSVButton;
-    TimeLineActivity timeLineActivity;
+    TimelineActivity timelineActivity;
     TweetGetTaskClass tweetGetTaskClass;
     Long sinceId;
     int numTweets;
@@ -55,11 +55,11 @@ public class HomePage extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_page);
-        tweetPostButton = (Button) findViewById(R.id.tweetUpdateButton);
-        tweetTimeLineButton = (Button) findViewById(R.id.tweetTimeLineButton);
-        getTweetsToCSVButton = (Button) findViewById(R.id.getTCSVButton);
-        timeLineActivity = new TimeLineActivity();
+        setContentView(com.zsirai.zsiraitweet.R.layout.activity_home_page);
+        tweetPostButton = (Button) findViewById(com.zsirai.zsiraitweet.R.id.tweetUpdateButton);
+        tweetTimeLineButton = (Button) findViewById(com.zsirai.zsiraitweet.R.id.tweetTimeLineButton);
+        getTweetsToCSVButton = (Button) findViewById(com.zsirai.zsiraitweet.R.id.getTCSVButton);
+        timelineActivity = new TimelineActivity();
         session = TwitterCore.getInstance().getSessionManager().getActiveSession();
         myTweets = new ArrayList<Tweet>();
         tweetGetTaskClass = new TweetGetTaskClass();
@@ -67,7 +67,7 @@ public class HomePage extends AppCompatActivity {
 
 
         if (session == null) {
-            startActivity(new Intent(HomePage.this, LoginActivity.class));
+            startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             finish();
         }
 
@@ -75,13 +75,13 @@ public class HomePage extends AppCompatActivity {
         tweetPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(HomePage.this, AddTweet.class));
+                startActivity(new Intent(HomeActivity.this, AddTweet.class));
             }
         });
         tweetTimeLineButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent timeLineIntent = new Intent(HomePage.this, TimeLineActivity.class);
+                Intent timeLineIntent = new Intent(HomeActivity.this, TimelineActivity.class);
                 startActivity(timeLineIntent);
 
             }
@@ -157,7 +157,7 @@ public class HomePage extends AppCompatActivity {
     // Create options menu.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.homepage_menu, menu);
+        getMenuInflater().inflate(com.zsirai.zsiraitweet.R.menu.homepage_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -166,10 +166,10 @@ public class HomePage extends AppCompatActivity {
 
         // When select the LogOut Button you clear or delete the session, It means you logged out
         // and go to the login activity.
-        if (item.getItemId() == R.id.menu_logout && session != null) {
+        if (item.getItemId() == com.zsirai.zsiraitweet.R.id.menu_logout && session != null) {
             TwitterCore.getInstance().getSessionManager().clearActiveSession();
             Toast.makeText(getApplicationContext(), "Logout from Twitter", Toast.LENGTH_LONG).show();
-            startActivity(new Intent(HomePage.this, LoginActivity.class));
+            startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             finish();
 
         }

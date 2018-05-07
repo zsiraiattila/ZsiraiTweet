@@ -1,4 +1,4 @@
-package com.zsirai.zsiraitweet2;
+package com.zsirai.zsiraitweet;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,20 +22,14 @@ import com.twitter.sdk.android.core.models.SymbolEntity;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.models.UrlEntity;
 import com.twitter.sdk.android.core.services.StatusesService;
-import com.twitter.sdk.android.tweetui.BasicTimelineFilter;
-import com.twitter.sdk.android.tweetui.FilterValues;
 import com.twitter.sdk.android.tweetui.FixedTweetTimeline;
-import com.twitter.sdk.android.tweetui.SearchTimeline;
-import com.twitter.sdk.android.tweetui.TimelineFilter;
 import com.twitter.sdk.android.tweetui.TweetTimelineRecyclerViewAdapter;
-import com.monkeylearn.MonkeyLearn;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -44,14 +38,14 @@ import java.util.List;
 
 import retrofit2.Call;
 
-public class TimeLineActivity extends AppCompatActivity {
+public class TimelineActivity extends AppCompatActivity {
 
     TextView titleTimeLineTV;
     TwitterSession twitterSession;
     FrameLayout myFrameLayout;
     RecyclerView myRecyclerView;
     List<Tweet> tweets;
-    HomePage homePage;
+    HomeActivity homeActivity;
     Long sinceId;
     int numTweets;
     String baseDir;
@@ -61,28 +55,28 @@ public class TimeLineActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_time_line);
+        setContentView(com.zsirai.zsiraitweet.R.layout.activity_time_line);
         numTweets = 20;
 
-        homePage = new HomePage();
+        homeActivity = new HomeActivity();
         tweets = new ArrayList<Tweet>();
-        myFrameLayout = (FrameLayout) findViewById(R.id.myFrameLayout);
-        myRecyclerView = (RecyclerView) findViewById(R.id.myRecyclerView);
+        myFrameLayout = (FrameLayout) findViewById(com.zsirai.zsiraitweet.R.id.myFrameLayout);
+        myRecyclerView = (RecyclerView) findViewById(com.zsirai.zsiraitweet.R.id.myRecyclerView);
         twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
-        titleTimeLineTV = (TextView) findViewById(R.id.titleTimeLineTV);
+        titleTimeLineTV = (TextView) findViewById(com.zsirai.zsiraitweet.R.id.titleTimeLineTV);
         titleTimeLineTV.setText(twitterSession.getUserName() + " 's " + titleTimeLineTV.getText());
         getandloadTweets(twitterSession,numTweets);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.timeline_menu, menu);
+        getMenuInflater().inflate(com.zsirai.zsiraitweet.R.menu.timeline_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_referesh) {
+        if (item.getItemId() == com.zsirai.zsiraitweet.R.id.menu_referesh) {
             getandloadTweets(twitterSession,numTweets);
         }
         return super.onOptionsItemSelected(item);
@@ -166,7 +160,7 @@ public class TimeLineActivity extends AppCompatActivity {
         FixedTweetTimeline fixedTimeLine = new FixedTweetTimeline.Builder().setTweets(tweets).build();
         final TweetTimelineRecyclerViewAdapter adapter = new TweetTimelineRecyclerViewAdapter.Builder(this)
                 .setTimeline(fixedTimeLine)
-                .setViewStyle(R.style.tw__TweetLightWithActionsStyle)
+                .setViewStyle(com.zsirai.zsiraitweet.R.style.tw__TweetLightWithActionsStyle)
                 .build();
 
         myRecyclerView.setAdapter(adapter);

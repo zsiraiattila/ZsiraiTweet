@@ -1,4 +1,4 @@
-package com.zsirai.zsiraitweet2;
+package com.zsirai.zsiraitweet;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -42,7 +42,7 @@ public class AddTweet extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_tweet);
+        setContentView(com.zsirai.zsiraitweet.R.layout.activity_add_tweet);
         twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
         if (twitterSession == null) {
             Intent intent = new Intent(AddTweet.this, LoginActivity.class);
@@ -56,11 +56,10 @@ public class AddTweet extends AppCompatActivity {
     }
 
     private void setupUI() {
-        et1 = (EditText) findViewById(R.id.editText);
-        image_button = (Button) findViewById(R.id.immage_button);
-        tvCharacters = (TextView) findViewById(R.id.textView);
-        post_button = (Button) findViewById(R.id.twittern_button);
-        tweetView_Container = (FrameLayout) findViewById(R.id.tweetView_Container);
+        et1 = (EditText) findViewById(com.zsirai.zsiraitweet.R.id.editText);
+        tvCharacters = (TextView) findViewById(com.zsirai.zsiraitweet.R.id.textView);
+        post_button = (Button) findViewById(com.zsirai.zsiraitweet.R.id.twittern_button);
+        tweetView_Container = (FrameLayout) findViewById(com.zsirai.zsiraitweet.R.id.tweetView_Container);
 
         post_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,10 +129,8 @@ public class AddTweet extends AppCompatActivity {
             @Override
             public void failure(TwitterException exception) {
                 Toast.makeText(getApplicationContext(), "Error occured when tried to post tweet", Toast.LENGTH_LONG).show();
-
             }
         });
-
     }
 
     private void displayTweet(Tweet tweet) {
