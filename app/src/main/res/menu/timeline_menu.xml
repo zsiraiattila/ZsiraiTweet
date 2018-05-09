@@ -4,5 +4,8 @@
         android:id="@+id/menu_referesh"
         android:title="Referesh"
      />
+    <item
+        android:id="@+id/menu_logout"
+        android:title="Logout" />
 
 </menu>

@@ -20,8 +20,8 @@
             </intent-filter>
         </activity>
         <activity android:name="com.zsirai.zsiraitweet.HomeActivity" />
-        <activity android:name="com.zsirai.zsiraitweet.AddTweet" />
-        <activity android:name="com.zsirai.zsiraitweet.TimelineActivity"></activity>
+        <activity android:name="com.zsirai.zsiraitweet.AddTweetActivity" />
+        <activity android:name="com.zsirai.zsiraitweet.FeedActivity"></activity>
     </application>
 
 </manifest>

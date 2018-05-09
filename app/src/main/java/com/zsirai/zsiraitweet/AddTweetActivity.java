@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 
 import retrofit2.Call;
 
-public class AddTweet extends AppCompatActivity {
+public class AddTweetActivity extends AppCompatActivity {
 
     TwitterSession twitterSession;
     EditText et1;
@@ -45,7 +45,7 @@ public class AddTweet extends AppCompatActivity {
         setContentView(com.zsirai.zsiraitweet.R.layout.activity_add_tweet);
         twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
         if (twitterSession == null) {
-            Intent intent = new Intent(AddTweet.this, LoginActivity.class);
+            Intent intent = new Intent(AddTweetActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
         } else {
@@ -134,7 +134,7 @@ public class AddTweet extends AppCompatActivity {
     }
 
     private void displayTweet(Tweet tweet) {
-        CompactTweetView compactTweetView = new CompactTweetView(AddTweet.this, tweet);
+        CompactTweetView compactTweetView = new CompactTweetView(AddTweetActivity.this, tweet);
         compactTweetView.setTweetActionsEnabled(true);
         tweetView_Container.addView(compactTweetView);
     }

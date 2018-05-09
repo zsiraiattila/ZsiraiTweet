@@ -3,28 +3,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.zsirai.zsiraitweet2.com.zsirai.zsiraitweet.TimeLineActivity">
+    tools:context="com.zsirai.zsiraitweet.FeedActivity">
 
     <TextView
-        android:id="@+id/titleTimeLineTV"
+        android:id="@+id/titleFeedTV"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Timeline" />
+        android:layout_alignParentStart="true"
+        android:text="Feed"
+        android:layout_alignParentLeft="true" />
 
-    <FrameLayout
-        android:id="@+id/myFrameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </FrameLayout>
     <android.support.v7.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/myRecyclerView"
-        android:layout_below="@+id/titleTimeLineTV"
+        android:id="@+id/tweetFeedRV"
+        android:layout_below="@+id/titleFeedTV"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="19dp">
-
+        android:layout_marginTop="20dp">
     </android.support.v7.widget.RecyclerView>
 
 </RelativeLayout>
