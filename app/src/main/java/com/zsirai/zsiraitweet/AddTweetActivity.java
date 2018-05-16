@@ -9,8 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,13 +29,10 @@ import retrofit2.Call;
 public class AddTweetActivity extends AppCompatActivity {
 
     TwitterSession twitterSession;
-    EditText et1;
+    EditText tweetET;
     TextView tvCharacters;
-    ImageView imageView;
-    Button image_button;
-    Button post_button;
+    Button tweetButton;
     FrameLayout tweetView_Container;
-    ScrollView myScrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,51 +43,44 @@ public class AddTweetActivity extends AppCompatActivity {
             Intent intent = new Intent(AddTweetActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
-        } else {
-
         }
         setupUI();
-
     }
 
     private void setupUI() {
-        et1 = (EditText) findViewById(com.zsirai.zsiraitweet.R.id.editText);
-        tvCharacters = (TextView) findViewById(com.zsirai.zsiraitweet.R.id.textView);
-        post_button = (Button) findViewById(com.zsirai.zsiraitweet.R.id.twittern_button);
+        tweetET = (EditText) findViewById(com.zsirai.zsiraitweet.R.id.tweetTextET);
+        tvCharacters = (TextView) findViewById(com.zsirai.zsiraitweet.R.id.charNumTV);
+        tweetButton = (Button) findViewById(com.zsirai.zsiraitweet.R.id.tweetButton);
         tweetView_Container = (FrameLayout) findViewById(com.zsirai.zsiraitweet.R.id.tweetView_Container);
 
-        post_button.setOnClickListener(new View.OnClickListener() {
+        tweetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                postTweet(et1.getText().toString());
+                postTweet(tweetET.getText().toString());
             }
         });
-        et1.addTextChangedListener(new TextWatcher() {
+        tweetET.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
                 if (charactersCountOk(s.toString())) {
-                    post_button.setEnabled(true);
+                    tweetButton.setEnabled(true);
                 } else {
-                    post_button.setEnabled(false);
+                    tweetButton.setEnabled(false);
                 }
             }
-
             @Override
             public void afterTextChanged(Editable s) {
 
             }
         });
-
     }
 
     private boolean charactersCountOk(String text) {
-
         // in this part, we count the caracters of the text ( without the hyperlinks) and add the
         // number of tweets * 23 ( this is something standard from twitter, that every URL "costs" 23 char.
         // Maximum character length is 140.
@@ -116,19 +104,20 @@ public class AddTweetActivity extends AppCompatActivity {
     }
 
     private void postTweet(String text) {
-        TwitterSession session = TwitterCore.getInstance().getSessionManager().getActiveSession();
         StatusesService statusesService = TwitterCore.getInstance().getApiClient().getStatusesService();
-        Call<Tweet> updateCall = statusesService.update(text, null, false, null, null, null, false, false, null);
+        Call<Tweet> updateCall = statusesService.update(text, null, false, null,
+                null, null, false, false, null);
         updateCall.enqueue(new Callback<Tweet>() {
             @Override
             public void success(Result<Tweet> result) {
-                Toast.makeText(getApplicationContext(), "Tweet posted", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Tweet posted!", Toast.LENGTH_LONG).show();
                 displayTweet(result.data);
             }
-
             @Override
             public void failure(TwitterException exception) {
-                Toast.makeText(getApplicationContext(), "Error occured when tried to post tweet", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(),
+                        "Error happened when tried to post tweet!"+exception.getMessage()
+                        , Toast.LENGTH_LONG).show();
             }
         });
     }

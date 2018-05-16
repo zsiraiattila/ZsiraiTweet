@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">ZsiraiTweet</string>
-    <string name="com.twitter.sdk.android.CONSUMER_KEY">PyKp430CaOjaLIHQ3JI0uMGV5</string>
-    <string name="com.twitter.sdk.android.CONSUMER_SECRET">	N9xmQOIs0bfnvuQq75PNYhJTka2DA8oAufbePO0D0O5m3UvTo1</string>
+    <string name="com.twitter.sdk.android.CONSUMER_KEY">hj9FFRPB3KfRhUXVnOsQf1etT</string>
+    <string name="com.twitter.sdk.android.CONSUMER_SECRET">QQqEeinodewHM6DKPtZbbq5rRekHQCinnmZaT7ZaLyXhjQJoNB</string>
     <string name="title_activity_home_page">Homepage</string>
     <string name="succlogin">Successfully Login</string>
     <string name="faillogin">Login failed!</string>

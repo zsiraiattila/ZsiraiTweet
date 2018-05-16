@@ -1,26 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.zsirai.zsiraitweet.AddTweetActivity">
 
     <EditText
-        android:id="@+id/editText"
-        android:layout_width="wrap_content"
+        android:id="@+id/tweetTextET"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
         android:ems="10"
-        android:inputType="textPersonName"
         android:text=""
-        android:layout_toLeftOf="@+id/textView"
-        android:layout_toStartOf="@+id/textView" />
+        android:layout_toLeftOf="@+id/charNumTV"
+         />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/charNumTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -30,30 +27,31 @@
         android:text="140" />
 
     <Button
-        android:id="@+id/twittern_button"
+        android:id="@+id/tweetButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Tweet"
-        android:layout_marginTop="22dp"
+        android:layout_marginTop="20dp"
         android:enabled="false"
+        android:layout_below="@+id/tweetTextET"
+        android:layout_alignRight="@+id/tweetTextET"
+        android:layout_alignEnd="@+id/tweetTextET" />
 
-        android:layout_below="@+id/editText"
-        android:layout_alignRight="@+id/editText"
-        android:layout_alignEnd="@+id/editText" />
-
-    <ImageView
-        android:layout_width="match_parent"
+    <Button
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/imageView"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/twittern_button" />
+        android:text="Cancel"
+        android:id="@+id/cancelButton"
+        android:layout_alignTop="@+id/tweetButton"
+        android:layout_toLeftOf="@+id/tweetButton"
+        android:layout_marginRight="10px" />
 
-        <FrameLayout
-            android:id="@+id/tweetView_Container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    <FrameLayout
+        android:id="@+id/tweetView_Container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tweetButton">
+    </FrameLayout>
 
-        </FrameLayout>
 
 </RelativeLayout>

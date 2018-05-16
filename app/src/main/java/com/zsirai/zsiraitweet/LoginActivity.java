@@ -1,23 +1,16 @@
 package com.zsirai.zsiraitweet;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.Twitter;
-import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
-import com.twitter.sdk.android.tweetcomposer.TweetComposer;
-import com.twitter.sdk.android.tweetui.TweetUi;
-
-import java.io.Serializable;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -42,7 +35,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
     }
 
     @Override
@@ -50,7 +42,5 @@ public class LoginActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         loginButton.onActivityResult(requestCode, resultCode, data);
     }
-
-
 
 }
