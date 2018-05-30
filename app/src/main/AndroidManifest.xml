@@ -21,7 +21,10 @@
         </activity>
         <activity android:name="com.zsirai.zsiraitweet.HomeActivity" />
         <activity android:name="com.zsirai.zsiraitweet.AddTweetActivity" />
-        <activity android:name="com.zsirai.zsiraitweet.FeedActivity"></activity>
+        <activity android:name="com.zsirai.zsiraitweet.FeedActivity">
+
+        </activity>
+
     </application>
 
 </manifest>

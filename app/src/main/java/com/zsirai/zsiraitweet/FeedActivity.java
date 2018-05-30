@@ -1,16 +1,25 @@
 package com.zsirai.zsiraitweet;
 
 import android.content.Intent;
+import android.icu.util.TimeUnit;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.mopub.common.util.Json;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
@@ -25,6 +34,7 @@ import com.twitter.sdk.android.tweetui.TweetTimelineRecyclerViewAdapter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +50,7 @@ import retrofit2.Call;
 public class FeedActivity extends AppCompatActivity {
 
     private static final String REST_ENDPOINT = "http://10.34.10.18:3000";
+    private static final String REST_ENDPOINT_KABINET = "http://192.168.0.101:3000";
     TextView titleFeedTV;
     TwitterSession twitterSession;
     TwitterApiClient twitterApiClient;
@@ -54,14 +65,17 @@ public class FeedActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(com.zsirai.zsiraitweet.R.layout.activity_feed);
-        numTweets = 30;
+        numTweets = 15;
         tweetFeedRV = (RecyclerView) findViewById(com.zsirai.zsiraitweet.R.id.tweetFeedRV);
         titleFeedTV = (TextView) findViewById(com.zsirai.zsiraitweet.R.id.titleFeedTV);
         twitterApiClient = TwitterCore.getInstance().getApiClient();
         statusesService = twitterApiClient.getStatusesService();
         twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
         titleFeedTV.setText(twitterSession.getUserName() + " 's " + titleFeedTV.getText());
-        okHttpClient = new OkHttpClient();
+        okHttpClient = new OkHttpClient.Builder().connectTimeout(100, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(100,java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(100, java.util.concurrent.TimeUnit.SECONDS)
+                .build();
         getandloadTweets(twitterSession, numTweets);
 
     }
@@ -129,43 +143,47 @@ public class FeedActivity extends AppCompatActivity {
                                 Toast.makeText(getApplicationContext(), "Error occured!", Toast.LENGTH_LONG).show();
                             }
                         });
+                        Log.e("Log from ","onResponse()");
                     }
 
                     @Override
                     public void onResponse(okhttp3.Call call, Response response) throws IOException {
-                        FeedActivity.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
-                            }
 
-                        });
+                        Log.e("Log from ","onResponse()");
+                        JSONObject jsonObject = null;
+                        StringBuilder jsonString = new StringBuilder(response.body().string().toString());
 
-                        System.out.println("Response body: \n" + response.body().string());
                         try {
-                            JSONObject jsonObject = new JSONObject(response.body().string());
-                            JSONArray jsonArray = jsonObject.getJSONArray("tweetarray");
+                            jsonObject = new JSONObject(jsonString.toString());
+                            JSONArray jsonArray = jsonObject.getJSONArray("tweets");
                             for (int i = 0; i < jsonArray.length(); i++) {
-                                JSONObject actObj = (JSONObject)jsonArray.get(i);
-                                String actId = actObj.getString("id");
-                                String actP = actObj.getString("point");
-                                for (Tweet tweet : tweets) {
+                                JSONObject act = (JSONObject) jsonArray.get(i);
+                                String actId = act.getString("id");
+                                String actP = act.getString("point");
+                                for (final Tweet tweet : tweets) {
                                     if (tweet.idStr.equals(actId) && (actP.contentEquals("0"))) {
-                                        tweets.remove(tweet);
+                                        FeedActivity.this.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                tweets.remove(tweet);
+                                            }
+                                        });
                                     }
                                 }
                             }
 
+                            FeedActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    addTweetsToRecycleView(tweets);
+                                    Toast.makeText(getApplicationContext(), "Tweets successfully loaded" + tweets.size(), Toast.LENGTH_LONG).show();
+                                }
+                            });
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
-
                     }
                 });
-
-                addTweetsToRecycleView(tweets);
-                Toast.makeText(getApplicationContext(), "Tweets successfully loaded" + tweets.size(), Toast.LENGTH_LONG).show();
             }
 
             @Override
