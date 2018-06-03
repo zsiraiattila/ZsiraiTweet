@@ -5,7 +5,7 @@ android {
     buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.zsirai.zsiraitweet"
-        minSdkVersion 15
+        minSdkVersion 21
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"

@@ -23,4 +23,15 @@
         android:layout_marginTop="20dp">
     </android.support.v7.widget.RecyclerView>
 
+    <android.support.v4.widget.ContentLoadingProgressBar
+        android:id="@+id/progressbar"
+        style="@style/SuperActivityToast_Progress_ProgressBar"
+        android:layout_height="100dp"
+        android:layout_width="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:scrollbarStyle="outsideOverlay"
+
+        android:visibility="visible" />
+
 </RelativeLayout>

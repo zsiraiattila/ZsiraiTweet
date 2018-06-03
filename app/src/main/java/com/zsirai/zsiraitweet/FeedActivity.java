@@ -1,26 +1,20 @@
 package com.zsirai.zsiraitweet;
 
 import android.content.Intent;
-import android.icu.util.TimeUnit;
-import android.os.AsyncTask;
+
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.JsonWriter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.mopub.common.util.Json;
+
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterApiClient;
@@ -35,16 +29,7 @@ import com.twitter.sdk.android.tweetui.TweetTimelineRecyclerViewAdapter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -65,9 +50,11 @@ public class FeedActivity extends AppCompatActivity {
     TwitterApiClient twitterApiClient;
     StatusesService statusesService;
     RecyclerView tweetFeedRV;
+    ProgressBar progressBar;
     CopyOnWriteArrayList<Tweet> gtweets;
     int numTweets;
     OkHttpClient okHttpClient;
+
 
 
     @Override
@@ -77,6 +64,7 @@ public class FeedActivity extends AppCompatActivity {
         numTweets = 20;
         gtweets = new CopyOnWriteArrayList<Tweet>();
         tweetFeedRV = (RecyclerView) findViewById(com.zsirai.zsiraitweet.R.id.tweetFeedRV);
+        progressBar = (ProgressBar)findViewById(R.id.progressbar);
         titleFeedTV = (TextView) findViewById(com.zsirai.zsiraitweet.R.id.titleFeedTV);
         twitterApiClient = TwitterCore.getInstance().getApiClient();
         statusesService = twitterApiClient.getStatusesService();
@@ -86,6 +74,8 @@ public class FeedActivity extends AppCompatActivity {
                 .readTimeout(100, java.util.concurrent.TimeUnit.SECONDS)
                 .writeTimeout(100, java.util.concurrent.TimeUnit.SECONDS)
                 .build();
+
+
         getandloadTweets(twitterSession, numTweets);
 
     }
@@ -122,6 +112,8 @@ public class FeedActivity extends AppCompatActivity {
     }
 
     private void getandloadTweets(TwitterSession session, int numTweets) {
+        tweetFeedRV.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
         tweetFeedRV.setLayoutManager(new LinearLayoutManager(this));
         Call<List<Tweet>> call = statusesService.homeTimeline(numTweets, null,
                 null, null, null, null, null);
@@ -129,21 +121,18 @@ public class FeedActivity extends AppCompatActivity {
 
             @Override
             public void success(Result<List<Tweet>> result) {
-                final ArrayList<Tweet> tweets = new ArrayList<Tweet>();
                 for (int i = 0; i < result.data.size(); i++) {
                     if ((result.data.get(i).lang.compareTo("en") == 0) && tweetIsOK(result.data.get(i))) {
-                        tweets.add(result.data.get(i));
                         gtweets.add(result.data.get(i));
                     }
                 }
                 RequestBody requestBody = null;
                 try {
-                    requestBody = RequestBody.create(MediaType.parse("application/json"), getTweetsInJson(tweets));
+                    requestBody = RequestBody.create(MediaType.parse("application/json"), getTweetsInJson(gtweets));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 Request request = new Request.Builder().url(REST_ENDPOINT + "/addtweet").post(requestBody).build();
-                //Request request = new Request.Builder().url(REST_ENDPOINT+"/").get().build();
                 okhttp3.Call restCall = okHttpClient.newCall(request);
                 restCall.enqueue(new okhttp3.Callback() {
                     @Override
@@ -168,23 +157,35 @@ public class FeedActivity extends AppCompatActivity {
                         try {
                             jsonObject = new JSONObject(jsonString.toString());
                             JSONArray jsonArray = jsonObject.getJSONArray("tweets");
-                            System.out.println("Tweets size: "+tweets.size());
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject act = (JSONObject) jsonArray.get(i);
                                 String actId = act.getString("id");
                                 String actP = act.getString("point");
-                                for (final Tweet tweet : tweets) {
+                                for (final Tweet tweet : gtweets) {
                                     if (tweet.idStr.equals(actId) && (actP.contentEquals("0"))) {
-                                        gtweets.remove(tweet);
+                                        FeedActivity.this.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                gtweets.remove(tweet);
+                                            }
+                                        });
+
                                     }
                                 }
                             }
+                            FeedActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getApplicationContext(), gtweets.size() + " tweets had displayed", Toast.LENGTH_LONG).show();
+                                }
+                            });
 
                             FeedActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    progressBar.setVisibility(View.INVISIBLE);
+                                    tweetFeedRV.setVisibility(View.VISIBLE);
                                     addTweetsToRecycleView(gtweets);
-                                    Toast.makeText(getApplicationContext(), "Tweets successfully loaded" + tweets.size(), Toast.LENGTH_LONG).show();
                                 }
                             });
                         } catch (JSONException e) {
@@ -199,24 +200,6 @@ public class FeedActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "An error happened!\n" + exception.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private void sendRequest(List<Tweet> tweets) {
-        OkHttpClient client = new OkHttpClient();
-        MediaType MIMEType = MediaType.parse("application/json; charset=utf-8");
-        RequestBody requestBody = null;
-        try {
-            requestBody = RequestBody.create(MIMEType, getTweetsInJson(tweets));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        Request request = new Request.Builder().url(REST_ENDPOINT + "/addtweet").post(requestBody).build();
-        try {
-            Response response = client.newCall(request).execute();
-            System.out.println("Response is: " + response.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void addTweetsToRecycleView(List<Tweet> tweets) {
@@ -248,11 +231,6 @@ public class FeedActivity extends AppCompatActivity {
         StringBuilder tsBuilder = new StringBuilder();
         String[] text = act.text.split("http");
         tsBuilder.append(text[0].replaceAll("\\r|\\n", " "));
-    /*    if (text.length > 1) {
-            text[1] = " , http" + text[1].replaceAll("\\r|\\n", " ");
-            tsBuilder.append(text[1]);
-        }
-    */
         JSONObject actObj = new JSONObject();
         try {
             actObj.put("id", act.idStr.trim());
@@ -266,34 +244,4 @@ public class FeedActivity extends AppCompatActivity {
         return actObj;
     }
 
-
-    public class TweetGetTaskClass extends AsyncTask<Integer, Void, String> {
-
-        @Override
-        protected String doInBackground(Integer... params) {
-
-
-            MediaType MIMEType = MediaType.parse("application/json; charset=utf-8");
-            RequestBody requestBody = null;
-            try {
-                requestBody = RequestBody.create(MIMEType, getTweetsInJson(gtweets));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            Request request = new Request.Builder().url(REST_ENDPOINT + "/addtweet").post(requestBody).build();
-            try {
-                Response response = okHttpClient.newCall(request).execute();
-                System.out.println("Response is: " + response.toString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return "Message";
-        }
-
-        @Override
-        protected void onPostExecute(String returnString) {
-            super.onPostExecute(returnString);
-            Toast.makeText(getApplicationContext(), returnString, Toast.LENGTH_LONG).show();
-        }
-    }
 }
