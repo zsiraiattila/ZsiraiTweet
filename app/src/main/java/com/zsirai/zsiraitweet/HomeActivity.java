@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.twitter.sdk.android.core.Twitter;
 import com.twitter.sdk.android.core.TwitterCore;
 import com.twitter.sdk.android.core.TwitterSession;
 
@@ -21,6 +22,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Twitter.initialize(this);
         setContentView(com.zsirai.zsiraitweet.R.layout.activity_home);
         tweetPostButton = (Button) findViewById(com.zsirai.zsiraitweet.R.id.tweetPostButton);
         tweetTimeLineButton = (Button) findViewById(com.zsirai.zsiraitweet.R.id.FeedButton);
