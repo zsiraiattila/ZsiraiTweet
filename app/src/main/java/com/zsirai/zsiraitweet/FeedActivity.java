@@ -43,7 +43,6 @@ import retrofit2.Call;
 public class FeedActivity extends AppCompatActivity {
 
     private static final String REST_ENDPOINT = "http://10.34.10.18:3000";
-    private static final String REST_ENDPOINT_KABINET = "http://192.168.0.101:3000";
     private static final String REST_ENDPOINT_HOME = "http://192.168.1.4:3000";
     TextView titleFeedTV;
     TwitterSession twitterSession;
@@ -70,14 +69,12 @@ public class FeedActivity extends AppCompatActivity {
         statusesService = twitterApiClient.getStatusesService();
         twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
         titleFeedTV.setText(twitterSession.getUserName() + " 's " + titleFeedTV.getText());
-        okHttpClient = new OkHttpClient.Builder().connectTimeout(100, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(100, java.util.concurrent.TimeUnit.SECONDS)
-                .writeTimeout(100, java.util.concurrent.TimeUnit.SECONDS)
+        okHttpClient = new OkHttpClient.Builder().connectTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
                 .build();
 
-
         getandloadTweets(twitterSession, numTweets);
-
     }
 
     @Override
@@ -98,6 +95,39 @@ public class FeedActivity extends AppCompatActivity {
             finish();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public boolean tweetIsOK(Tweet tweet) {
+        if (tweet.user.name != null && tweet.text != null &&
+                tweet.idStr != null && tweet.createdAt != null) {
+            String idStr = tweet.idStr.toString().trim();
+            String name = tweet.user.name.toString().trim();
+            String text = tweet.text.toString().trim();
+            String createdAt = tweet.createdAt.toString().trim();
+            if (name.length() > 2 && text.length() > 20
+                    && idStr.length() >= 18 && createdAt.length() > 10) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public JSONObject getTweetInJSON(Tweet act) {
+        StringBuilder sBuilder = new StringBuilder();
+        StringBuilder tsBuilder = new StringBuilder();
+        String[] text = act.text.split("http");
+        tsBuilder.append(text[0].replaceAll("\\r|\\n", " "));
+        JSONObject actObj = new JSONObject();
+        try {
+            actObj.put("id", act.idStr.trim());
+            actObj.put("source", act.user.name.trim());
+            actObj.put("text", tsBuilder.toString());
+            actObj.put("favcount", act.favoriteCount);
+            actObj.put("retcount", act.retweetCount);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return actObj;
     }
 
     private String getTweetsInJson(List<Tweet> tweets) throws JSONException {
@@ -140,19 +170,16 @@ public class FeedActivity extends AppCompatActivity {
                         FeedActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getApplicationContext(), "Error occured!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), "Error happened!", Toast.LENGTH_LONG).show();
                             }
                         });
-                        Log.e("Log from ", "onFailure()");
                     }
 
                     @Override
                     public void onResponse(okhttp3.Call call, Response response) throws IOException {
 
-                        Log.e("Log from ", "onResponse()");
                         JSONObject jsonObject = null;
                         StringBuilder jsonString = new StringBuilder(response.body().string().toString());
-
 
                         try {
                             jsonObject = new JSONObject(jsonString.toString());
@@ -211,37 +238,8 @@ public class FeedActivity extends AppCompatActivity {
         tweetFeedRV.setAdapter(adapter);
     }
 
-    public boolean tweetIsOK(Tweet tweet) {
-        if (tweet.user.name != null && tweet.text != null &&
-                tweet.idStr != null && tweet.createdAt != null) {
-            String idStr = tweet.idStr.toString().trim();
-            String name = tweet.user.name.toString().trim();
-            String text = tweet.text.toString().trim();
-            String createdAt = tweet.createdAt.toString().trim();
-            if (name.length() > 2 && text.length() > 25
-                    && idStr.length() >= 18 && createdAt.length() > 10) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    public JSONObject getTweetInJSON(Tweet act) {
-        StringBuilder sBuilder = new StringBuilder();
-        StringBuilder tsBuilder = new StringBuilder();
-        String[] text = act.text.split("http");
-        tsBuilder.append(text[0].replaceAll("\\r|\\n", " "));
-        JSONObject actObj = new JSONObject();
-        try {
-            actObj.put("id", act.idStr.trim());
-            actObj.put("source", act.user.name.trim());
-            actObj.put("text", tsBuilder.toString());
-            actObj.put("favcount", act.favoriteCount);
-            actObj.put("retcount", act.retweetCount);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return actObj;
-    }
+
+
 
 }
