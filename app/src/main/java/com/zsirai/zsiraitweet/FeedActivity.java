@@ -60,7 +60,7 @@ public class FeedActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(com.zsirai.zsiraitweet.R.layout.activity_feed);
-        numTweets = 20;
+        numTweets = 40;
         gtweets = new CopyOnWriteArrayList<Tweet>();
         tweetFeedRV = (RecyclerView) findViewById(com.zsirai.zsiraitweet.R.id.tweetFeedRV);
         progressBar = (ProgressBar)findViewById(R.id.progressbar);
@@ -103,9 +103,8 @@ public class FeedActivity extends AppCompatActivity {
             String idStr = tweet.idStr.toString().trim();
             String name = tweet.user.name.toString().trim();
             String text = tweet.text.toString().trim();
-            String createdAt = tweet.createdAt.toString().trim();
-            if (name.length() > 2 && text.length() > 20
-                    && idStr.length() >= 18 && createdAt.length() > 10) {
+            if (name.length() > 2 && text.length() > 10
+                    && idStr.length() >= 18 ) {
                 return true;
             }
         }
