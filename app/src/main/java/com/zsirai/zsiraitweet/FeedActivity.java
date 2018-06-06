@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +28,7 @@ import com.twitter.sdk.android.tweetui.TweetTimelineRecyclerViewAdapter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -44,16 +44,16 @@ public class FeedActivity extends AppCompatActivity {
 
     private static final String REST_ENDPOINT = "http://10.34.10.18:3000";
     private static final String REST_ENDPOINT_HOME = "http://192.168.1.4:3000";
+    private static final int SEC_TIMEOUT = 90;
     TextView titleFeedTV;
     TwitterSession twitterSession;
     TwitterApiClient twitterApiClient;
     StatusesService statusesService;
     RecyclerView tweetFeedRV;
     ProgressBar progressBar;
-    CopyOnWriteArrayList<Tweet> gtweets;
+    CopyOnWriteArrayList<Tweet> tweets;
     int numTweets;
     OkHttpClient okHttpClient;
-
 
 
     @Override
@@ -61,17 +61,16 @@ public class FeedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(com.zsirai.zsiraitweet.R.layout.activity_feed);
         numTweets = 40;
-        gtweets = new CopyOnWriteArrayList<Tweet>();
         tweetFeedRV = (RecyclerView) findViewById(com.zsirai.zsiraitweet.R.id.tweetFeedRV);
-        progressBar = (ProgressBar)findViewById(R.id.progressbar);
+        progressBar = (ProgressBar) findViewById(R.id.progressbar);
         titleFeedTV = (TextView) findViewById(com.zsirai.zsiraitweet.R.id.titleFeedTV);
         twitterApiClient = TwitterCore.getInstance().getApiClient();
         statusesService = twitterApiClient.getStatusesService();
         twitterSession = TwitterCore.getInstance().getSessionManager().getActiveSession();
         titleFeedTV.setText(twitterSession.getUserName() + " 's " + titleFeedTV.getText());
-        okHttpClient = new OkHttpClient.Builder().connectTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
-                .writeTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+        okHttpClient = new OkHttpClient.Builder().connectTimeout(SEC_TIMEOUT, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(SEC_TIMEOUT, java.util.concurrent.TimeUnit.SECONDS)
+                .writeTimeout(SEC_TIMEOUT, java.util.concurrent.TimeUnit.SECONDS)
                 .build();
 
         getandloadTweets(twitterSession, numTweets);
@@ -104,7 +103,7 @@ public class FeedActivity extends AppCompatActivity {
             String name = tweet.user.name.toString().trim();
             String text = tweet.text.toString().trim();
             if (name.length() > 2 && text.length() > 10
-                    && idStr.length() >= 18 ) {
+                    && idStr.length() >= 18) {
                 return true;
             }
         }
@@ -143,6 +142,7 @@ public class FeedActivity extends AppCompatActivity {
     private void getandloadTweets(TwitterSession session, int numTweets) {
         tweetFeedRV.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
+        tweets = new CopyOnWriteArrayList<Tweet>();
         tweetFeedRV.setLayoutManager(new LinearLayoutManager(this));
         Call<List<Tweet>> call = statusesService.homeTimeline(numTweets, null,
                 null, null, null, null, null);
@@ -152,12 +152,12 @@ public class FeedActivity extends AppCompatActivity {
             public void success(Result<List<Tweet>> result) {
                 for (int i = 0; i < result.data.size(); i++) {
                     if ((result.data.get(i).lang.compareTo("en") == 0) && tweetIsOK(result.data.get(i))) {
-                        gtweets.add(result.data.get(i));
+                        tweets.add(result.data.get(i));
                     }
                 }
                 RequestBody requestBody = null;
                 try {
-                    requestBody = RequestBody.create(MediaType.parse("application/json"), getTweetsInJson(gtweets));
+                    requestBody = RequestBody.create(MediaType.parse("application/json"), getTweetsInJson(tweets));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -169,7 +169,11 @@ public class FeedActivity extends AppCompatActivity {
                         FeedActivity.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getApplicationContext(), "Error happened!", Toast.LENGTH_LONG).show();
+                                progressBar.setVisibility(View.INVISIBLE);
+                                tweetFeedRV.setVisibility(View.VISIBLE);
+                                Toast.makeText(getApplicationContext(), "Error happened while try to filter!", Toast.LENGTH_LONG).show();
+                                addTweetsToRecycleView(tweets);
+                                Toast.makeText(getApplicationContext(),tweets.size()+" tweets have displayed!",Toast.LENGTH_LONG).show();
                             }
                         });
                     }
@@ -187,12 +191,12 @@ public class FeedActivity extends AppCompatActivity {
                                 JSONObject act = (JSONObject) jsonArray.get(i);
                                 String actId = act.getString("id");
                                 String actP = act.getString("point");
-                                for (final Tweet tweet : gtweets) {
+                                for (final Tweet tweet : tweets) {
                                     if (tweet.idStr.equals(actId) && (actP.contentEquals("0"))) {
                                         FeedActivity.this.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                gtweets.remove(tweet);
+                                                tweets.remove(tweet);
                                             }
                                         });
 
@@ -202,7 +206,8 @@ public class FeedActivity extends AppCompatActivity {
                             FeedActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(getApplicationContext(), gtweets.size() + " tweets had displayed", Toast.LENGTH_LONG).show();
+                                    addTweetsToRecycleView(tweets);
+                                    Toast.makeText(getApplicationContext(), tweets.size() + " tweets had displayed", Toast.LENGTH_LONG).show();
                                 }
                             });
 
@@ -211,7 +216,7 @@ public class FeedActivity extends AppCompatActivity {
                                 public void run() {
                                     progressBar.setVisibility(View.INVISIBLE);
                                     tweetFeedRV.setVisibility(View.VISIBLE);
-                                    addTweetsToRecycleView(gtweets);
+
                                 }
                             });
                         } catch (JSONException e) {
@@ -224,8 +229,10 @@ public class FeedActivity extends AppCompatActivity {
             @Override
             public void failure(TwitterException exception) {
                 Toast.makeText(getApplicationContext(), "An error happened!\n" + exception.getMessage(), Toast.LENGTH_LONG).show();
+                addTweetsToRecycleView(tweets);
             }
         });
+
     }
 
     private void addTweetsToRecycleView(List<Tweet> tweets) {
@@ -236,9 +243,6 @@ public class FeedActivity extends AppCompatActivity {
                 .build();
         tweetFeedRV.setAdapter(adapter);
     }
-
-
-
 
 
 }
