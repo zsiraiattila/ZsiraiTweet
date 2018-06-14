@@ -161,7 +161,7 @@ public class FeedActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                Request request = new Request.Builder().url(REST_ENDPOINT + "/addtweet").post(requestBody).build();
+                Request request = new Request.Builder().url(REST_ENDPOINT_HOME + "/addtweet").post(requestBody).build();
                 okhttp3.Call restCall = okHttpClient.newCall(request);
                 restCall.enqueue(new okhttp3.Callback() {
                     @Override
