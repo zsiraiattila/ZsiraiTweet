@@ -96,14 +96,14 @@ public class FeedActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public boolean tweetIsOK(Tweet tweet) {
+    public boolean tweetIsOk(Tweet tweet) {
         if (tweet.user.name != null && tweet.text != null &&
                 tweet.idStr != null && tweet.createdAt != null) {
             String idStr = tweet.idStr.toString().trim();
             String name = tweet.user.name.toString().trim();
             String text = tweet.text.toString().trim();
-            if (name.length() > 2 && text.length() > 10
-                    && idStr.length() >= 18) {
+            if ((name.length() > 2 && text.length() > 5
+                    && idStr.length() >= 18) && (tweet.lang.contentEquals("en"))) {
                 return true;
             }
         }
@@ -147,11 +147,10 @@ public class FeedActivity extends AppCompatActivity {
         Call<List<Tweet>> call = statusesService.homeTimeline(numTweets, null,
                 null, null, null, null, null);
         call.enqueue(new Callback<List<Tweet>>() {
-
             @Override
             public void success(Result<List<Tweet>> result) {
                 for (int i = 0; i < result.data.size(); i++) {
-                    if ((result.data.get(i).lang.compareTo("en") == 0) && tweetIsOK(result.data.get(i))) {
+                    if (tweetIsOk(result.data.get(i))) {
                         tweets.add(result.data.get(i));
                     }
                 }
@@ -165,25 +164,9 @@ public class FeedActivity extends AppCompatActivity {
                 okhttp3.Call restCall = okHttpClient.newCall(request);
                 restCall.enqueue(new okhttp3.Callback() {
                     @Override
-                    public void onFailure(okhttp3.Call call, IOException e) {
-                        FeedActivity.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressBar.setVisibility(View.INVISIBLE);
-                                tweetFeedRV.setVisibility(View.VISIBLE);
-                                Toast.makeText(getApplicationContext(), "Error happened while try to filter!", Toast.LENGTH_LONG).show();
-                                addTweetsToRecycleView(tweets);
-                                Toast.makeText(getApplicationContext(),tweets.size()+" tweets have displayed!",Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-
-                    @Override
                     public void onResponse(okhttp3.Call call, Response response) throws IOException {
-
                         JSONObject jsonObject = null;
                         StringBuilder jsonString = new StringBuilder(response.body().string().toString());
-
                         try {
                             jsonObject = new JSONObject(jsonString.toString());
                             JSONArray jsonArray = jsonObject.getJSONArray("tweets");
@@ -199,29 +182,37 @@ public class FeedActivity extends AppCompatActivity {
                                                 tweets.remove(tweet);
                                             }
                                         });
-
                                     }
                                 }
                             }
                             FeedActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    addTweetsToRecycleView(tweets);
-                                    Toast.makeText(getApplicationContext(), tweets.size() + " tweets had displayed", Toast.LENGTH_LONG).show();
-                                }
-                            });
-
-                            FeedActivity.this.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
+                                    addTweetsToRecyclerView(tweets);
+                                    Toast.makeText(getApplicationContext(), tweets.size() +
+                                            " tweets had displayed", Toast.LENGTH_LONG).show();
                                     progressBar.setVisibility(View.INVISIBLE);
                                     tweetFeedRV.setVisibility(View.VISIBLE);
-
                                 }
                             });
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                    }
+
+                    @Override
+                    public void onFailure(okhttp3.Call call, IOException e) {
+                        FeedActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                progressBar.setVisibility(View.INVISIBLE);
+                                tweetFeedRV.setVisibility(View.VISIBLE);
+                                Toast.makeText(getApplicationContext(), "Error happened while try to filter!", Toast.LENGTH_LONG).show();
+                                addTweetsToRecyclerView(tweets);
+                                Toast.makeText(getApplicationContext(), tweets.size() + " tweets have displayed!", Toast.LENGTH_LONG).show();
+                            }
+                        });
                     }
                 });
             }
@@ -229,16 +220,17 @@ public class FeedActivity extends AppCompatActivity {
             @Override
             public void failure(TwitterException exception) {
                 Toast.makeText(getApplicationContext(), "An error happened!\n" + exception.getMessage(), Toast.LENGTH_LONG).show();
-                addTweetsToRecycleView(tweets);
+                addTweetsToRecyclerView(tweets);
             }
         });
 
     }
 
-    private void addTweetsToRecycleView(List<Tweet> tweets) {
-        FixedTweetTimeline fixedTimeLine = new FixedTweetTimeline.Builder().setTweets(tweets).build();
-        final TweetTimelineRecyclerViewAdapter adapter = new TweetTimelineRecyclerViewAdapter.Builder(this)
-                .setTimeline(fixedTimeLine)
+    private void addTweetsToRecyclerView(List<Tweet> tweets) {
+        FixedTweetTimeline timeLine = new FixedTweetTimeline.Builder().setTweets(tweets).build();
+        final TweetTimelineRecyclerViewAdapter adapter = new TweetTimelineRecyclerViewAdapter
+                .Builder(this)
+                .setTimeline(timeLine)
                 .setViewStyle(R.style.tw__TweetLightWithActionsStyle)
                 .build();
         tweetFeedRV.setAdapter(adapter);
